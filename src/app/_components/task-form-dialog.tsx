@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 
 type Errors = { title?: string; description?: string };
 
@@ -38,7 +39,6 @@ function validate(title: string, description: string): Errors {
 function TaskForm({ task, onDone }: { task?: TaskData; onDone: () => void }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const isEditing = !!task;
 
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
@@ -69,6 +69,8 @@ function TaskForm({ task, onDone }: { task?: TaskData; onDone: () => void }) {
   );
 
   const isSaving = create.isPending || update.isPending;
+  const isEditing = !!task;
+  const label = isEditing ? "Continuar" : "Criar tarefa";
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -141,11 +143,8 @@ function TaskForm({ task, onDone }: { task?: TaskData; onDone: () => void }) {
           Cancelar
         </Button>
         <Button type="submit" disabled={isSaving}>
-          {isSaving
-            ? "Salvando..."
-            : isEditing
-              ? "Salvar alterações"
-              : "Criar tarefa"}
+          {isSaving && <Spinner className="mr-2 h-4 w-4" />}
+          {label}
         </Button>
       </DialogFooter>
     </form>

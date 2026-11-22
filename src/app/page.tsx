@@ -5,7 +5,16 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const queryClient = getQueryClient();
-  await queryClient.query(trpc.tasks.list.queryOptions());
+
+  await queryClient.infiniteQuery(
+    trpc.tasks.list.infiniteQueryOptions(
+      { limit: 20 },
+      {
+        initialCursor: null,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    ),
+  );
 
   return (
     <HydrateClient>

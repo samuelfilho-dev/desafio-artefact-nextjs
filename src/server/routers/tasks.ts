@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, publicProcedure } from "../trpc";
 import { tasks, type Task } from "../model";
+import { mockTasks } from "./mock";
 
 const taskInput = z.object({
   title: z.string().trim().min(1, "Title is required"),
@@ -22,9 +23,34 @@ const findOrThrow = (id: string) => {
 };
 
 export const tasksRouter = router({
-  list: publicProcedure.query(() =>
-    [...tasks].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
-  ),
+  list: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().int().positive().max(100).default(20),
+        cursor: z.number().int().nonnegative().nullish(),
+      }),
+    )
+    .query(({ input }) => {
+      // const sortedTasks = [...tasks].sort(
+      //   (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      // );
+
+      // --- Mock
+      const sortedTasks = [...mockTasks].sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      );
+
+      const cursor = input.cursor ?? 0;
+      const items = sortedTasks.slice(cursor, cursor + input.limit);
+
+      return {
+        items,
+        nextCursor:
+          cursor + input.limit < sortedTasks.length
+            ? cursor + input.limit
+            : null,
+      };
+    }),
 
   byId: publicProcedure
     .input(z.object({ id: z.string() }))

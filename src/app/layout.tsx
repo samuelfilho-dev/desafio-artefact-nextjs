@@ -58,7 +58,7 @@ export default function RootLayout({
                   {children}
                 </div>
               </main>
-              <Toaster richColors />
+              <Toaster position="top-right" richColors />
             </TooltipProvider>
           </TRPCReactProvider>
         </ThemeProvider>

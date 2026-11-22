@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTRPC } from "@/trpc/client";
 import { getErrorMessage } from "@/lib/errors";
@@ -33,18 +38,52 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "cn";
+import { Spinner } from "@/components/ui/spinner";
+
+const PAGE_SIZE = 20;
 
 export function TaskList() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const {
-    data: tasks,
+    data,
     isError,
     error,
     refetch,
-    isFetching,
-  } = useQuery(trpc.tasks.list.queryOptions());
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(
+    trpc.tasks.list.infiniteQueryOptions(
+      { limit: PAGE_SIZE },
+      {
+        initialCursor: null,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    ),
+  );
+
+  useEffect(() => {
+    const loadMoreElement = loadMoreRef.current;
+
+    if (!loadMoreElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+
+    observer.observe(loadMoreElement);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const tasks = data?.pages.flatMap((page) => page.items) ?? [];
 
   const invalidate = () =>
     queryClient.invalidateQueries(trpc.tasks.pathFilter());
@@ -86,9 +125,9 @@ export function TaskList() {
           size="sm"
           className="mt-2"
           onClick={() => refetch()}
-          disabled={isFetching}
+          disabled={isFetchingNextPage}
         >
-          {isFetching ? "Tentando..." : "Tentar novamente"}
+          {isFetchingNextPage ? "Tentando..." : "Tentar novamente"}
         </Button>
       </div>
     );
@@ -103,133 +142,143 @@ export function TaskList() {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Título</TableHead>
-            <TableHead>Descrição</TableHead>
-            <TableHead>Criada em</TableHead>
-            <TableHead>Tempo</TableHead>
-            <TableHead>Ações</TableHead>
-          </TableRow>
-        </TableHeader>
+    <>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead>Criada em</TableHead>
+              <TableHead>Tempo</TableHead>
+              <TableHead>Ações</TableHead>
+            </TableRow>
+          </TableHeader>
 
-        <TableBody>
-          {tasks.map((task) => {
-            const isCompleted = task.isCompleted;
-            const isDeleting =
-              remove.isPending && remove.variables?.id === task.id;
+          <TableBody>
+            {tasks.map((task) => {
+              const isCompleted = task.isCompleted;
+              const isDeleting =
+                remove.isPending && remove.variables?.id === task.id;
 
-            return (
-              <TableRow
-                key={task.id}
-                className={cn(
-                  isDeleting && "opacity-50",
-                  isCompleted && "line-through bg-primary/20",
-                )}
-              >
-                <TableCell className="font-medium">{task.title}</TableCell>
-
-                <TableCell className="max-w-xs truncate text-muted-foreground">
-                  {task.description || "—"}
-                </TableCell>
-
-                <TableCell
-                  className="whitespace-nowrap text-muted-foreground"
-                  suppressHydrationWarning
+              return (
+                <TableRow
+                  key={task.id}
+                  className={cn(
+                    isDeleting && "opacity-50",
+                    isCompleted && "line-through bg-primary/20",
+                  )}
                 >
-                  {task.createdAt.toLocaleDateString("pt-BR")}
-                </TableCell>
+                  <TableCell className="font-medium">{task.title}</TableCell>
 
-                <TableCell>
-                  <Stopwatch task={task} />
-                </TableCell>
+                  <TableCell className="max-w-xs truncate text-muted-foreground">
+                    {task.description || "—"}
+                  </TableCell>
 
-                <TableCell>
-                  <div className="flex gap-2">
-                    {!isCompleted && (
+                  <TableCell
+                    className="whitespace-nowrap text-muted-foreground"
+                    suppressHydrationWarning
+                  >
+                    {task.createdAt.toLocaleDateString("pt-BR")}
+                  </TableCell>
+
+                  <TableCell>
+                    <Stopwatch task={task} />
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {!isCompleted && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (task.timeSpentMs == 0) {
+                                  toast.error(
+                                    "Não é possível concluir uma tarefa sem tempo registrado.",
+                                  );
+                                  return;
+                                }
+
+                                toggle.mutate({ id: task.id });
+                              }}
+                            >
+                              <Check />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Concluir tarefa</TooltipContent>
+                        </Tooltip>
+                      )}
+
                       <Tooltip>
                         <TooltipTrigger>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (task.timeSpentMs == 0) {
-                                toast.error(
-                                  "Não é possível concluir uma tarefa sem tempo registrado.",
-                                );
-                                return;
-                              }
-
-                              toggle.mutate({ id: task.id });
-                            }}
-                          >
-                            <Check />
-                          </Button>
+                          <TaskFormDialog
+                            task={task}
+                            triggerLabel={<Pencil className="size-4" />}
+                            triggerClassName={buttonVariants({
+                              variant: "default",
+                              size: "sm",
+                            })}
+                          />
                         </TooltipTrigger>
-                        <TooltipContent>Concluir tarefa</TooltipContent>
+                        <TooltipContent>Editar tarefa</TooltipContent>
                       </Tooltip>
-                    )}
 
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <TaskFormDialog
-                          task={task}
-                          triggerLabel={<Pencil className="size-4" />}
-                          triggerClassName={buttonVariants({
-                            variant: "default",
-                            size: "sm",
-                          })}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>Editar tarefa</TooltipContent>
-                    </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <AlertDialog>
+                            <AlertDialogTrigger
+                              render={
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  disabled={isDeleting}
+                                />
+                              }
+                            >
+                              <Trash2 className="size-4" />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Excluir tarefa?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  A tarefa &quot;{task.title}&quot; será
+                                  excluída permanentemente.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => remove.mutate({ id: task.id })}
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TooltipTrigger>
+                        <TooltipContent>Excluir tarefa</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <AlertDialog>
-                          <AlertDialogTrigger
-                            render={
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                disabled={isDeleting}
-                              />
-                            }
-                          >
-                            <Trash2 className="size-4" />
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Excluir tarefa?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                A tarefa &quot;{task.title}&quot; será excluída
-                                permanentemente.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => remove.mutate({ id: task.id })}
-                              >
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TooltipTrigger>
-                      <TooltipContent>Excluir tarefa</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </div>
+      <div ref={loadMoreRef} className="h-1" aria-hidden="true" />
+      {isFetchingNextPage && (
+        <Spinner
+          className="mx-auto mt-4 h-6 w-6"
+          aria-label="Carregando mais tarefas..."
+        />
+      )}
+    </>
   );
 }
