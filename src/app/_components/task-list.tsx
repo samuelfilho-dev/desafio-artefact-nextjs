@@ -5,6 +5,28 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTRPC } from "@/trpc/client";
 import { getErrorMessage } from "@/lib/errors";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { TaskFormDialog } from "./task-form-dialog";
 
 export function TaskList() {
   const trpc = useTRPC();
@@ -24,7 +46,7 @@ export function TaskList() {
   const remove = useMutation(
     trpc.tasks.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Task deleted successfully.");
+        toast.success("Tarefa excluída com sucesso.");
         return invalidate();
       },
       onError: (err) => {
@@ -36,78 +58,114 @@ export function TaskList() {
 
   if (isError) {
     return (
-      <div className="rounded border border-red-300 bg-red-50 p-4">
-        <p className="text-red-700">
+      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-destructive">
           Não foi possível carregar as tarefas: {getErrorMessage(error)}
         </p>
-        <button
+        <Button
+          variant="destructive"
+          size="sm"
+          className="mt-2"
           onClick={() => refetch()}
           disabled={isFetching}
-          className="mt-2 rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
         >
           {isFetching ? "Tentando..." : "Tentar novamente"}
-        </button>
+        </Button>
       </div>
     );
   }
 
   if (!tasks || tasks.length === 0) {
     return (
-      <p className="rounded border border-dashed bg-white p-8 text-center text-gray-500">
+      <p className="rounded-md border border-dashed p-8 text-center text-muted-foreground">
         Nenhuma tarefa cadastrada. Crie a primeira!
       </p>
     );
   }
 
   return (
-    <ul className="space-y-2">
-      {tasks.map((task) => {
-        const isDeleting = remove.isPending && remove.variables?.id === task.id;
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Título</TableHead>
+            <TableHead>Descrição</TableHead>
+            <TableHead>Criada em</TableHead>
+            <TableHead>Ações</TableHead>
+          </TableRow>
+        </TableHeader>
 
-        return (
-          <li
-            key={task.id}
-            className="flex items-start gap-3 rounded border bg-white p-3"
-          >
-            <input
-              type="checkbox"
-              disabled={isDeleting}
-              className="mt-1.5 h-4 w-4"
-              aria-label={`Marcar "${task.title}" como concluída`}
-            />
+        <TableBody>
+          {tasks.map((task) => {
+            const isDeleting =
+              remove.isPending && remove.variables?.id === task.id;
 
-            <div className="min-w-0 flex-1">
-              <p>{task.title}</p>
-              {task.description && (
-                <p className="text-sm text-gray-600">{task.description}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-400">
-                Criada em {task.createdAt.toLocaleString("pt-BR")}
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <Link
-                href={`/tasks/${task.id}/edit`}
-                className="rounded border px-3 py-1 text-sm hover:bg-gray-100"
+            return (
+              <TableRow
+                key={task.id}
+                className={isDeleting ? "opacity-50" : ""}
               >
-                Editar
-              </Link>
-              <button
-                disabled={isDeleting}
-                onClick={() => {
-                  if (confirm(`Excluir a tarefa "${task.title}"?`)) {
-                    remove.mutate({ id: task.id });
-                  }
-                }}
-                className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {isDeleting ? "Excluindo..." : "Excluir"}
-              </button>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+                <TableCell className="font-medium">{task.title}</TableCell>
+
+                <TableCell className="max-w-xs truncate text-muted-foreground">
+                  {task.description || "—"}
+                </TableCell>
+
+                <TableCell
+                  className="whitespace-nowrap text-muted-foreground"
+                  suppressHydrationWarning
+                >
+                  {task.createdAt.toLocaleString("pt-BR")}
+                </TableCell>
+
+                <TableCell>
+                  <div className="flex gap-2">
+                    <TaskFormDialog
+                      task={task}
+                      triggerLabel="Editar"
+                      triggerClassName={buttonVariants({
+                        variant: "outline",
+                        size: "sm",
+                      })}
+                    />
+
+                    <AlertDialog>
+                      <AlertDialogTrigger
+                        render={
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={isDeleting}
+                          />
+                        }
+                      >
+                        {isDeleting ? "Excluindo..." : "Excluir"}
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir tarefa?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            A tarefa &quot;{task.title}&quot; será excluída
+                            permanentemente.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => remove.mutate({ id: task.id })}
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

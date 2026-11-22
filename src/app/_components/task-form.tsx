@@ -88,8 +88,8 @@ export function TaskForm({ taskId }: { taskId?: string }) {
             if (errors.title) setErrors((p) => ({ ...p, title: undefined }));
           }}
           aria-invalid={!!errors.title}
-          className={`w-full rounded border bg-white p-2 ${
-            errors.title ? "border-red-500" : "border-gray-300"
+          className={`w-full rounded border bg-background p-2 ${
+            errors.title ? "border-red-500" : "border-input"
           }`}
           placeholder="Ex: Estudar tRPC"
         />
@@ -113,8 +113,8 @@ export function TaskForm({ taskId }: { taskId?: string }) {
               setErrors((p) => ({ ...p, description: undefined }));
           }}
           aria-invalid={!!errors.description}
-          className={`w-full rounded border bg-white p-2 ${
-            errors.description ? "border-red-500" : "border-gray-300"
+          className={`w-full rounded border bg-background p-2 ${
+            errors.description ? "border-red-500" : "border-input"
           }`}
         />
         {errors.description && (
@@ -134,7 +134,7 @@ export function TaskForm({ taskId }: { taskId?: string }) {
               ? "Salvar alterações"
               : "Criar tarefa"}
         </button>
-        <Link href="/" className="rounded border px-4 py-2 hover:bg-gray-100">
+        <Link href="/" className="rounded border px-4 py-2 hover:bg-muted">
           Cancelar
         </Link>
       </div>
