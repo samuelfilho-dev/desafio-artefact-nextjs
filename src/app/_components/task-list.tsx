@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTRPC } from "@/trpc/client";
 import { getErrorMessage } from "@/lib/errors";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -27,6 +25,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { TaskFormDialog } from "./task-form-dialog";
+import { Stopwatch } from "./stopwatch";
+import { Check, Pencil, Trash2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function TaskList() {
   const trpc = useTRPC();
@@ -46,7 +51,7 @@ export function TaskList() {
   const remove = useMutation(
     trpc.tasks.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Tarefa excluída com sucesso.");
+        toast.error("Tarefa excluída com sucesso.");
         return invalidate();
       },
       onError: (err) => {
@@ -91,6 +96,7 @@ export function TaskList() {
             <TableHead>Título</TableHead>
             <TableHead>Descrição</TableHead>
             <TableHead>Criada em</TableHead>
+            <TableHead>Tempo</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -115,50 +121,75 @@ export function TaskList() {
                   className="whitespace-nowrap text-muted-foreground"
                   suppressHydrationWarning
                 >
-                  {task.createdAt.toLocaleString("pt-BR")}
+                  {task.createdAt.toLocaleDateString("pt-BR")}
+                </TableCell>
+
+                <TableCell>
+                  <Stopwatch />
                 </TableCell>
 
                 <TableCell>
                   <div className="flex gap-2">
-                    <TaskFormDialog
-                      task={task}
-                      triggerLabel="Editar"
-                      triggerClassName={buttonVariants({
-                        variant: "outline",
-                        size: "sm",
-                      })}
-                    />
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button variant="outline" size="sm">
+                          <Check />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Concluir tarefa</TooltipContent>
+                    </Tooltip>
 
-                    <AlertDialog>
-                      <AlertDialogTrigger
-                        render={
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            disabled={isDeleting}
-                          />
-                        }
-                      >
-                        {isDeleting ? "Excluindo..." : "Excluir"}
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir tarefa?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            A tarefa &quot;{task.title}&quot; será excluída
-                            permanentemente.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => remove.mutate({ id: task.id })}
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <TaskFormDialog
+                          task={task}
+                          triggerLabel={<Pencil className="size-4" />}
+                          triggerClassName={buttonVariants({
+                            variant: "default",
+                            size: "sm",
+                          })}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>Editar tarefa</TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <AlertDialog>
+                          <AlertDialogTrigger
+                            render={
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                disabled={isDeleting}
+                              />
+                            }
                           >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="size-4" />
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Excluir tarefa?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                A tarefa &quot;{task.title}&quot; será excluída
+                                permanentemente.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => remove.mutate({ id: task.id })}
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TooltipTrigger>
+                      <TooltipContent>Excluir tarefa</TooltipContent>
+                    </Tooltip>
                   </div>
                 </TableCell>
               </TableRow>

@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { Toaster } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TaskFormDialog } from "./_components/task-form-dialog";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
@@ -36,27 +37,29 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
-            <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-              <div className="mx-auto flex h-16 w-full items-center gap-3 px-4">
-                <h1 className="mr-auto text-lg font-semibold tracking-tight">
-                  Minhas Tarefas
-                </h1>
-                <div className="flex items-center gap-2">
-                  <ThemeToggle />
+            <TooltipProvider>
+              <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
+                <div className="mx-auto flex h-16 w-full items-center gap-3 px-4">
+                  <h1 className="mr-auto text-lg font-semibold tracking-tight">
+                    Minhas Tarefas
+                  </h1>
+                  <div className="flex items-center gap-2">
+                    <ThemeToggle />
 
-                  <TaskFormDialog className="gap-2">
-                    <Plus />
-                    <span className="hidden sm:inline">Adicionar tarefa</span>
-                  </TaskFormDialog>
+                    <TaskFormDialog className="gap-2">
+                      <Plus />
+                      <span className="hidden sm:inline">Adicionar tarefa</span>
+                    </TaskFormDialog>
+                  </div>
                 </div>
-              </div>
-            </header>
-            <main className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
-              <div className="min-h-[calc(100vh-7rem)] rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
-                {children}
-              </div>
-            </main>
-            <Toaster richColors />
+              </header>
+              <main className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
+                <div className="min-h-[calc(100vh-7rem)] rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
+                  {children}
+                </div>
+              </main>
+              <Toaster richColors />
+            </TooltipProvider>
           </TRPCReactProvider>
         </ThemeProvider>
       </body>

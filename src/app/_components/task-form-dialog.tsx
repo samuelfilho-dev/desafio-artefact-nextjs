@@ -164,7 +164,7 @@ export function TaskFormDialog({
   task?: TaskData;
   children?: ReactNode;
   className?: string;
-  triggerLabel?: string;
+  triggerLabel?: string | ReactNode;
   triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
