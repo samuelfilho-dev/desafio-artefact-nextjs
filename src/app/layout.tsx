@@ -1,3 +1,10 @@
+/**
+ * This project uses Next.js 15, tRPC, and React Query to create a task manager.
+ * The global layout is defined in the `layout.tsx` file, which wraps the entire application with providers for tRPC, theming, and tooltips.
+ * The header includes a title, a button to toggle the theme, and a button to add new tasks.
+ * The Shadcn design system was chosen for the components because it is a popular and well-documented library,
+ */
+
 import type { Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Inter } from "next/font/google";

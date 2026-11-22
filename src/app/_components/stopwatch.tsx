@@ -1,4 +1,11 @@
-"use client";
+"use client"
+
+/**
+ * A stopwatch component has been added to the project
+ * that allows users to track the time spent on a specific task.
+ * This allows the user to see the time spent on each task and to start, pause, and reset the stopwatch.
+ * The stopwatch is updated in real time, and the elapsed time is saved to the backend when the stopwatch is paused.
+ */
 
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";

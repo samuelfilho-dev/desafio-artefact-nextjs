@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * A theme-toggle component has been added to the project, allowing users to switch between light and dark themes.
+ * The ThemeToggle component uses the `useTheme` hook from the `next-themes` package to retrieve the current theme and a function to change it.
+ * The button displays a sun icon when the theme is dark and a moon icon when the theme is light.
+ * This allows users to customize the appearance of the user interface according to their preferences.
+ */
+
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
