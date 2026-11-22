@@ -5,6 +5,10 @@ import { Pause, Play, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Task } from "@/server/model";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { toast } from "sonner";
 
 function formatTime(totalSeconds: number) {
   const h = Math.floor(totalSeconds / 3600);
@@ -19,9 +23,13 @@ function formatTime(totalSeconds: number) {
 
 type StopwatchProps = {
   className?: string;
+  task?: Task;
 };
 
-export function Stopwatch({ className }: StopwatchProps) {
+export function Stopwatch({ className, task }: StopwatchProps) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
   const [elapsedMs, setElapsedMs] = useState(0);
   const [running, setRunning] = useState(false);
 
@@ -39,19 +47,51 @@ export function Stopwatch({ className }: StopwatchProps) {
     return () => clearInterval(id);
   }, [running]);
 
+  useEffect(() => {
+    if (task?.isCompleted) {
+      setRunning(false);
+    }
+  }, [task?.isCompleted]);
+
+  useEffect(() => {
+    if (task) {
+      setElapsedMs(task.timeSpentMs ?? 0);
+    }
+  }, [task?.id, task?.timeSpentMs]);
+
+  const update = useMutation(
+    trpc.tasks.updateTimeSpent.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries(trpc.tasks.pathFilter());
+      },
+      onError: (err) => {
+        toast.error(`Erro ao atualizar tempo: ${err.message}`);
+      },
+    }),
+  );
+
   function start() {
     originRef.current = Date.now() - elapsedMs;
     setRunning(true);
   }
 
-  function pause() {
-    setElapsedMs(Date.now() - originRef.current);
-    setRunning(false);
-  }
-
   function reset() {
     setRunning(false);
     setElapsedMs(0);
+  }
+
+  function pause() {
+    const currentElapsedMs = Date.now() - originRef.current;
+    setElapsedMs(currentElapsedMs);
+
+    if (!task) {
+      toast.error("Nenhuma tarefa selecionada para atualizar o tempo.");
+      setRunning(false);
+      return;
+    }
+
+    update.mutate({ id: task.id, timeSpentMs: currentElapsedMs });
+    setRunning(false);
   }
 
   const seconds = Math.floor(elapsedMs / 1000);
@@ -66,28 +106,32 @@ export function Stopwatch({ className }: StopwatchProps) {
         {formatTime(seconds)}
       </span>
 
-      {running ? (
-        <Button variant="secondary" size="sm" onClick={pause}>
-          <Pause className="size-4 fill-amber-500 text-amber-500" />
-          Pausar
-        </Button>
-      ) : (
-        <Button variant="secondary" size="sm" onClick={start}>
-          <Play className="size-4 fill-green-500 text-green-500" />
-          {elapsedMs > 0 ? "Retomar" : "Iniciar"}
-        </Button>
-      )}
+      {task?.isCompleted === false && (
+        <>
+          {running ? (
+            <Button variant="secondary" size="sm" onClick={pause}>
+              <Pause className="size-4 fill-amber-500 text-amber-500" />
+              Pausar
+            </Button>
+          ) : (
+            <Button variant="secondary" size="sm" onClick={start}>
+              <Play className="size-4 fill-green-500 text-green-500" />
+              {elapsedMs > 0 ? "Retomar" : "Iniciar"}
+            </Button>
+          )}
 
-      {!running && elapsedMs > 0 && (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Zerar cronômetro"
-          title="Zerar"
-          onClick={reset}
-        >
-          <RotateCcw className="size-4" />
-        </Button>
+          {!running && elapsedMs > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Zerar cronômetro"
+              title="Zerar"
+              onClick={reset}
+            >
+              <RotateCcw className="size-4" />
+            </Button>
+          )}
+        </>
       )}
     </div>
   );

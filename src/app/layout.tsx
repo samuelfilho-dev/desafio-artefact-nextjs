@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { TaskFormDialog } from "./_components/task-form-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import "./globals.css";
+import "./globals.css"; 
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

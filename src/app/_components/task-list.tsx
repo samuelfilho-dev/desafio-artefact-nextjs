@@ -32,6 +32,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "cn";
 
 export function TaskList() {
   const trpc = useTRPC();
@@ -52,6 +53,19 @@ export function TaskList() {
     trpc.tasks.delete.mutationOptions({
       onSuccess: () => {
         toast.error("Tarefa excluída com sucesso.");
+        return invalidate();
+      },
+      onError: (err) => {
+        toast.error(getErrorMessage(err));
+        invalidate();
+      },
+    }),
+  );
+
+  const toggle = useMutation(
+    trpc.tasks.toggle.mutationOptions({
+      onSuccess: () => {
+        toast.success("Tarefa concluída com sucesso.");
         return invalidate();
       },
       onError: (err) => {
@@ -103,13 +117,17 @@ export function TaskList() {
 
         <TableBody>
           {tasks.map((task) => {
+            const isCompleted = task.isCompleted;
             const isDeleting =
               remove.isPending && remove.variables?.id === task.id;
 
             return (
               <TableRow
                 key={task.id}
-                className={isDeleting ? "opacity-50" : ""}
+                className={cn(
+                  isDeleting && "opacity-50",
+                  isCompleted && "line-through bg-primary/20",
+                )}
               >
                 <TableCell className="font-medium">{task.title}</TableCell>
 
@@ -125,19 +143,34 @@ export function TaskList() {
                 </TableCell>
 
                 <TableCell>
-                  <Stopwatch />
+                  <Stopwatch task={task} />
                 </TableCell>
 
                 <TableCell>
                   <div className="flex gap-2">
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Button variant="outline" size="sm">
-                          <Check />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Concluir tarefa</TooltipContent>
-                    </Tooltip>
+                    {!isCompleted && (
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (task.timeSpentMs == 0) {
+                                toast.error(
+                                  "Não é possível concluir uma tarefa sem tempo registrado.",
+                                );
+                                return;
+                              }
+
+                              toggle.mutate({ id: task.id });
+                            }}
+                          >
+                            <Check />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Concluir tarefa</TooltipContent>
+                      </Tooltip>
+                    )}
 
                     <Tooltip>
                       <TooltipTrigger>

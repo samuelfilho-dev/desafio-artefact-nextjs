@@ -35,6 +35,8 @@ export const tasksRouter = router({
       id: crypto.randomUUID(),
       title: input.title,
       description: input.description ?? "",
+      timeSpentMs: 0,
+      isCompleted: false,
       createdAt: new Date(),
     };
 
@@ -42,12 +44,28 @@ export const tasksRouter = router({
     return task;
   }),
 
+  toggle: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ input }) => {
+      const task = findOrThrow(input.id);
+      task.isCompleted = !task.isCompleted;
+      return task;
+    }),
+
   update: publicProcedure
     .input(taskInput.extend({ id: z.string() }))
     .mutation(({ input }) => {
       const task = findOrThrow(input.id);
       task.title = input.title;
       task.description = input.description ?? "";
+      return task;
+    }),
+
+  updateTimeSpent: publicProcedure
+    .input(z.object({ id: z.string(), timeSpentMs: z.number() }))
+    .mutation(({ input }) => {
+      const task = findOrThrow(input.id);
+      task.timeSpentMs = input.timeSpentMs;
       return task;
     }),
 
