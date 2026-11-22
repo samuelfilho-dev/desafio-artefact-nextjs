@@ -34,25 +34,31 @@ The interface uses React Query to retrieve and update data. Operations are sent 
 
 ## How to run
 
-1. Enter the project directory:
+1. Clone the repository:
+
+```bash
+git clone https://github.com/samuelfilho-dev/desafio-artefact-nextjs.git
+```
+
+2. Enter the project directory:
 
 ```bash
 cd desafio-artefact-nextjs
 ```
 
-2. Install the dependencies:
+3. Install the dependencies:
 
 ```bash
 npm install
 ```
 
-3. Start the development server:
+4. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Changes made to the code are automatically updated by the development server.
 

@@ -34,25 +34,31 @@ A interface utiliza React Query para consultar e atualizar os dados. As operaç�
 
 ## Como executar
 
-1. Acesse a pasta do projeto:
+1. Clone o repositório:
+
+```bash
+git clone https://github.com/samuelfilho-dev/desafio-artefact-nextjs.git
+```
+
+2. Acesse a pasta do projeto:
 
 ```bash
 cd desafio-artefact-nextjs
 ```
 
-2. Instale as dependências:
+3. Instale as dependências:
 
 ```bash
 npm install
 ```
 
-3. Inicie o servidor de desenvolvimento:
+4. Inicie o servidor de desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-4. Abra [http://localhost:3000](http://localhost:3000) no navegador.
+5. Abra [http://localhost:3000](http://localhost:3000) no navegador.
 
 As alterações feitas no código são atualizadas automaticamente pelo servidor de desenvolvimento.
 
