@@ -31,14 +31,14 @@ export const tasksRouter = router({
       }),
     )
     .query(({ input }) => {
-      // const sortedTasks = [...tasks].sort(
-      //   (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-      // );
-
-      // --- Mock
-      const sortedTasks = [...mockTasks].sort(
+      const sortedTasks = [...tasks].sort(
         (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
       );
+
+      // // --- Mock
+      // const sortedTasks = [...mockTasks].sort(
+      //   (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      // );
 
       const cursor = input.cursor ?? 0;
       const items = sortedTasks.slice(cursor, cursor + input.limit);
