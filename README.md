@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gerenciador de Tarefas
 
-## Getting Started
+Aplicação web para criar, acompanhar e organizar tarefas. O projeto foi desenvolvido com Next.js 15 e oferece uma interface responsiva, tema claro/escuro e operações de dados realizadas por meio do tRPC.
 
-First, run the development server:
+## Como o sistema funciona
+
+A página principal exibe a lista de tarefas em uma tabela com carregamento infinito de 20 itens por vez. É possível:
+
+- Criar uma tarefa com título e descrição;
+- Editar ou excluir uma tarefa;
+- Iniciar, pausar, retomar ou zerar o cronômetro de cada tarefa;
+- Concluir uma tarefa após registrar tempo;
+- Alternar entre tema claro e escuro;
+- Receber mensagens de sucesso e erro por notificações.
+
+A interface utiliza React Query para consultar e atualizar os dados. As operações são enviadas ao servidor por tRPC, em um endpoint interno da própria aplicação. As tarefas ficam armazenadas em memória no servidor; os dados são mantidos durante a execução em ambiente de desenvolvimento, mas são reiniciados quando o servidor reinicia ou em uma implantação sem estado persistente.
+
+## Tecnologias
+
+- Next.js 15
+- React 19
+- TypeScript
+- tRPC
+- TanStack React Query
+- Tailwind CSS
+- shadcn/ui e Base UI
+- Zod
+- Sonner
+
+## Pré-requisitos
+
+- Node.js 20 ou superior
+- npm
+
+## Como executar
+
+1. Acesse a pasta do projeto:
+
+```bash
+cd desafio-artefact-nextjs
+```
+
+2. Instale as dependências:
+
+```bash
+npm install
+```
+
+3. Inicie o servidor de desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Abra [http://localhost:3000](http://localhost:3000) no navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+As alterações feitas no código são atualizadas automaticamente pelo servidor de desenvolvimento.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts disponíveis
 
-## Learn More
+| Comando | Descrição |
+| --- | --- |
+| `npm run dev` | Executa o projeto em modo de desenvolvimento |
+| `npm run build` | Cria a versão de produção |
+| `npm run start` | Inicia a versão de produção já compilada |
+| `npm run lint` | Executa a análise estática do código |
 
-To learn more about Next.js, take a look at the following resources:
+Para verificar a versão de produção:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+npm run start
+```
