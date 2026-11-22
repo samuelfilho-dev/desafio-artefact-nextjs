@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   description: "Desafio técnico com Next.js 15 + tRPC",
 };
 
+/**
+ * Global layout component for the application.
+ * This component wraps the entire application with providers for tRPC, theming, and tooltips.
+ * It also includes a header with a title, theme toggle, and a button to add new tasks.
+ * The main content area is styled and contains the children components passed to this layout.
+ * @param {Object} props - The props for the RootLayout component.
+ * @param {React.ReactNode} props.children - The child components to be rendered within the layout.
+ * @returns {JSX.Element} The rendered RootLayout component.
+ */
 export default function RootLayout({
   children,
 }: {

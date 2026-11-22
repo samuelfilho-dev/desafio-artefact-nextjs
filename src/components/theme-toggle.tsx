@@ -5,6 +5,12 @@ import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 
+/**
+ * ThemeToggle component provides a button to toggle between light and dark themes.
+ * It uses the `useTheme` hook from `next-themes` to get the current theme and a function to change it. 
+ * The button displays a sun icon when the theme is dark and a moon icon when the theme is light.
+ * @returns {JSX.Element} The rendered ThemeToggle component.
+ */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
 

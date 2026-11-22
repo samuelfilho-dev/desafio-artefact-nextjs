@@ -10,6 +10,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { toast } from "sonner";
 
+/**
+ *  Fomart time in seconds to HH:MM:SS or MM:SS format.
+ *  @param totalSeconds - The total time in seconds to format.
+ *  @returns A string representing the formatted time.
+ */
 function formatTime(totalSeconds: number) {
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
@@ -25,6 +30,15 @@ type StopwatchProps = {
   className?: string;
   task?: Task;
 };
+
+/**
+ * A stopwatch component that tracks elapsed time for a given task.
+ * Calculates elapsed time based on the task's `timeSpentMs` property and allows starting, pausing, and resetting the timer.
+ * Updates the task's `timeSpentMs` in the backend when paused.
+ *
+ * @param {StopwatchProps} props - The props for the Stopwatch component.
+ * @returns {JSX.Element} The rendered Stopwatch component.
+ */
 
 export function Stopwatch({ className, task }: StopwatchProps) {
   const trpc = useTRPC();

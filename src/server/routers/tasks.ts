@@ -4,11 +4,24 @@ import { router, publicProcedure } from "../trpc";
 import { tasks, type Task } from "../model";
 import { mockTasks } from "./mock";
 
+/**
+ * Tasks router for handling task-related operations.
+ * This router provides procedures for listing, creating, updating, toggling, and deleting tasks.
+ * It uses tRPC's router and publicProcedure to define the API endpoints.
+ * The tasks are stored in an in-memory array for demonstration purposes.
+ * @returns {typeof router} The tasks router with defined procedures.
+ */
 const taskInput = z.object({
   title: z.string().trim().min(1, "Title is required"),
   description: z.optional(z.string().trim()),
 });
 
+/**
+ * Find a task by its ID or throw a NOT_FOUND error if it doesn't exist.
+ * @param {string} id - The ID of the task to find.
+ * @returns {Task} The found task object.
+ * @throws {TRPCError} Throws a NOT_FOUND error if the task is not found.
+ */
 const findOrThrow = (id: string) => {
   const task = tasks.find((t) => t.id === id);
 
@@ -22,6 +35,13 @@ const findOrThrow = (id: string) => {
   return task;
 };
 
+/**
+ * Tasks router for handling task-related operations.
+ * This router provides procedures for listing, creating, updating, toggling, and deleting tasks.
+ * It uses tRPC's router and publicProcedure to define the API endpoints.
+ * The tasks are stored in an in-memory array for demonstration purposes.
+ * @returns {typeof router} The tasks router with defined procedures.
+ */
 export const tasksRouter = router({
   list: publicProcedure
     .input(

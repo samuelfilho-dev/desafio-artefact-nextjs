@@ -46,6 +46,12 @@ const descriptions = [
   "Documentar as alterações realizadas para facilitar futuras manutenções.",
 ];
 
+/**
+ * Creates a mock list of tasks for testing and development purposes.
+ * Each task has a unique ID, title, description, completion status, time spent, and creation date.
+ * The list contains 150 tasks with randomized properties.
+ * @returns {Task[]} An array of mock Task objects.
+ */
 export const mockTasks: Task[] = Array.from(
   { length: 150 },
   (_, index): Task => ({

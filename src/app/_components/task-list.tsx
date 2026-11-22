@@ -42,6 +42,13 @@ import { Spinner } from "@/components/ui/spinner";
 
 const PAGE_SIZE = 20;
 
+/**
+ * Create a paginated list of tasks with infinite scrolling.
+ * Using React Query's useInfiniteQuery to fetch tasks in pages and IntersectionObserver to load more tasks when the user scrolls to the bottom.
+ * Task are fetched from the backend using tRPC and React Query for state management.
+ * Formatting using Table components and UI elements from the design system.
+ * @returns {JSX.Element} The rendered TaskList component.
+ */
 export function TaskList() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();

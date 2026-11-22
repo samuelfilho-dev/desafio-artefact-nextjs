@@ -24,6 +24,14 @@ type Errors = { title?: string; description?: string };
 
 type TaskData = { id: string; title: string; description: string };
 
+/**
+ * Validate the task form fields.
+ * Returns an object with error messages for each field if validation fails.
+ * @param title - The title of the task.
+ * @param description - The description of the task.
+ * @returns An object containing error messages for invalid fields.
+ */
+
 function validate(title: string, description: string): Errors {
   const errors: Errors = {};
   if (!title.trim()) errors.title = "O título é obrigatório.";
@@ -34,8 +42,13 @@ function validate(title: string, description: string): Errors {
   return errors;
 }
 
-/* ---------- Formulário (renderizado só quando o modal está aberto) ---------- */
-
+/**
+ * TaskForm component handles the creation and editing of tasks.
+ * It manages form state, validation, and submission using React Query mutations.
+ * @param task - Optional task data for editing an existing task.
+ * @param onDone - Callback function to be called when the form is successfully submitted or canceled.
+ * @returns JSX.Element representing the task form.
+ */
 function TaskForm({ task, onDone }: { task?: TaskData; onDone: () => void }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -151,7 +164,16 @@ function TaskForm({ task, onDone }: { task?: TaskData; onDone: () => void }) {
   );
 }
 
-/* ---------- Modal + gatilho ---------- */
+/**
+ * TaskFormDialog component wraps the TaskForm in a modal dialog.
+ * It manages the open state of the dialog and provides a trigger button.
+ * @param task - Optional task data for editing an existing task.
+ * @param children - Optional ReactNode to be used as the trigger content.
+ * @param className - Optional className for the trigger button.
+ * @param triggerLabel - Optional label for the trigger button if children are not provided.
+ * @param triggerClassName - Optional className for the trigger button if children are not provided.
+ * @returns JSX.Element representing the task form dialog.
+ */
 
 export function TaskFormDialog({
   task,
@@ -177,7 +199,6 @@ export function TaskFormDialog({
         {children ?? triggerLabel ?? "Nova tarefa"}
       </DialogTrigger>
       <DialogContent>
-        {/* O form só existe com o modal aberto: o estado reinicia a cada abertura */}
         <TaskForm task={task} onDone={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
